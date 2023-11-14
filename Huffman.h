@@ -14,6 +14,9 @@
 #include <optional>
 
 
+// TODO: Create proper bitstream class instead of std::vector<Bool>
+// TODO: Test
+
 struct Node;
 using huff_node_ptr = std::shared_ptr<Node>;
 using BitSet = std::vector<bool>;
@@ -43,7 +46,7 @@ struct Node {
 };
 
 
-class Huffman : public Compressor {
+class Huffman : public Compressor<BitSet> {
 public:
 
     //Singleton
@@ -60,12 +63,41 @@ public:
     Huffman& operator=(const Huffman&& other) = delete;
 
 
-    void compress(const std::string& src) override {
+    void compress(const std::string& src, BitSet& compressed) override {
         std::cout << "Compressing...\n";
+
+        build_huffman_tree(src);
+
+        build_codes(root_, {});
+
+        for(auto elem : src) {
+            auto& code = codes_[elem];
+            // TODO replace with memcpy calls
+            compressed.insert(compressed.end(), code.begin(), code.end());
+        }
+
     }
 
-    void decompress(const std::string& src) override {
-        std::cout << "Decompressing...\n";
+    void decompress(const BitSet& compressed, std::string& src) override {
+        std::cout << "Deompressing...\n";
+
+        auto curr = root_;
+
+        for(auto bit : compressed) {
+            if(curr->type_ == Node_Type::Leaf) {
+                auto char_elem = curr->c_.value();
+                src.push_back(char_elem);
+
+                curr = root_;
+            } else {
+                curr = (bit == 0) ? curr->left_ : curr->right_;
+            }
+        }
+    }
+
+    void reset() {
+        root_ = nullptr;
+        codes_.clear();
     }
 
 
@@ -86,7 +118,7 @@ private:
         }
     }
 
-    void build_huffman_tree(std::string& src) {
+    void build_huffman_tree(const std::string& src) {
         std::unordered_map<char, int> histogram;
         build_histogram(src, histogram);
 
@@ -105,11 +137,31 @@ private:
         }
 
         assert(pq.size() == 1);
-        root = pq.top();
+        root_ = pq.top();
         pq.pop();
     }
 
-    huff_node_ptr root;
+    void build_codes(huff_node_ptr curr, const BitSet& code) {
+        if(curr == nullptr)
+            return;
+
+        if(curr->type_ == Node_Type::Leaf) {
+            auto char_elem = curr->c_.value();
+            codes_[char_elem] = code;
+        }
+
+
+        auto code_left = code;
+        code_left.push_back(0);
+
+        auto code_right = code;
+        code_left.push_back(1);
+
+        build_codes(curr->left_, code_left);
+        build_codes(curr->right_, code_right);
+    }
+
+    huff_node_ptr root_;
     std::unordered_map<char, BitSet> codes_;
 
 };
