@@ -8,8 +8,8 @@
 #include <fstream>
 
 class Compressor {
-    virtual void compress(std::string& src) = 0;
-    virtual void decompress(std::string& src) = 0;
+    virtual void compress(const std::string& src) = 0;
+    virtual void decompress(const std::string& src) = 0;
 };
 
 #endif //COMPRESSIONSERVICE_COMPRESS_H

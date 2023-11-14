@@ -1,6 +1,10 @@
 #include <iostream>
+#include "Huffman.h"
 
 int main() {
-    std::cout << "Hello, World!" << std::endl;
-    return 0;
+    Huffman& single_instance = Huffman::instance();
+
+    single_instance.compress("Hello");
+    single_instance.decompress("Hello");
+
 }
