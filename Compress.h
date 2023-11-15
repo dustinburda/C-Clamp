@@ -8,6 +8,7 @@
 #include <fstream>
 
 using BitSet = std::vector<bool>;
+using IntegerList = std::vector<int>;
 
 template<typename T>
 class Compressor {

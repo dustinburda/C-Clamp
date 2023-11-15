@@ -20,7 +20,6 @@
 struct Node;
 using huff_node_ptr = std::shared_ptr<Node>;
 using BitSet = std::vector<bool>;
-using node_pq = std::priority_queue<huff_node_ptr, std::vector<huff_node_ptr>>;
 
 enum class Node_Type {
     Leaf,
@@ -39,12 +38,13 @@ struct Node {
     Node_Type type_;
     huff_node_ptr left_;
     huff_node_ptr right_;
-
-    bool operator<(huff_node_ptr other) const {
-        return this->freq_ < other->freq_;
-    }
 };
 
+
+static std::function<bool(huff_node_ptr, huff_node_ptr)> compare = [](auto left, auto right) {
+    return left->freq_ > right->freq_;
+};
+using node_pq = std::priority_queue<huff_node_ptr, std::vector<huff_node_ptr>, decltype(compare)>;
 
 class Huffman : public Compressor<BitSet> {
 public:
@@ -79,18 +79,19 @@ public:
     }
 
     void decompress(const BitSet& compressed, std::string& src) override {
-        std::cout << "Deompressing...\n";
+        std::cout << "Decompressing...\n";
 
         auto curr = root_;
 
         for(auto bit : compressed) {
+            curr = (bit == 0) ? curr->left_
+                              : curr->right_;
+
             if(curr->type_ == Node_Type::Leaf) {
                 auto char_elem = curr->c_.value();
                 src.push_back(char_elem);
 
                 curr = root_;
-            } else {
-                curr = (bit == 0) ? curr->left_ : curr->right_;
             }
         }
     }
@@ -122,7 +123,7 @@ private:
         std::unordered_map<char, int> histogram;
         build_histogram(src, histogram);
 
-        std::priority_queue<huff_node_ptr, std::vector<huff_node_ptr>> pq;
+        std::priority_queue<huff_node_ptr, std::vector<huff_node_ptr>, decltype(compare)> pq(compare);
         populate_pq(histogram, pq);
 
         while(pq.size() > 1) {
@@ -155,7 +156,7 @@ private:
         code_left.push_back(0);
 
         auto code_right = code;
-        code_left.push_back(1);
+        code_right.push_back(1);
 
         build_codes(curr->left_, code_left);
         build_codes(curr->right_, code_right);
