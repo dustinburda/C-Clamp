@@ -50,7 +50,7 @@ class Huffman : public Compressor<BitSet> {
 public:
 
     //Singleton
-    static Huffman& instance() {
+    static Huffman& get_instance() {
         static Huffman instance;
         return instance;
     }
@@ -162,6 +162,7 @@ private:
         build_codes(curr->right_, code_right);
     }
 
+private:
     huff_node_ptr root_;
     std::unordered_map<char, BitSet> codes_;
 
