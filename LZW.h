@@ -17,6 +17,13 @@ public:
         return instance;
     }
 
+    //Can't copy
+    LZW(const LZW& other) = delete;
+    LZW& operator=(const LZW& other) = delete;
+    //Can't delete
+    LZW(const LZW&& other) = delete;
+    LZW& operator=(const LZW&& other) = delete;
+
     void compress(const std::string& src, IntegerList& compressed) override {
         std::cout << "Compressing...\n";
         std::unordered_map<std::string, int> dict;
@@ -49,6 +56,7 @@ public:
 
     void decompress(const IntegerList& compressed, std::string& src) override {
         std::cout << "Decompressing... \n";
+
         std::unordered_map<int, std::string> dict;
         build_decompress_dict(dict);
 
@@ -58,6 +66,7 @@ public:
         src += old_s;
         for(int i = 1; i < compressed.size(); i++) {
             auto curr_code = compressed[i];
+
             std::string new_s { "" };
             if(dict.count(curr_code) > 0)
                 new_s = dict[curr_code];
@@ -65,8 +74,10 @@ public:
                 new_s = old_s + std::string(1, old_s[0]);
 
             src += new_s;
+
             dict[new_code] = old_s +std::string(1, new_s[0]);
             new_code++;
+
             old_s = new_s;
         }
 
