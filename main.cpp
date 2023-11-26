@@ -8,22 +8,22 @@ int main() {
     //TODO: Create bitstream class
     // Operate on files/uint8_t instead of strings
 
-//    //=================================================
-//    //|    HUFFMAN COMPRESSION TESTS
-//    //================================================
-//    Huffman& huffman_instance = Huffman::get_instance();
-//
-//    BitSet bits;
-//    std::string s1 {"Compress this with Huffman!"};
-//
-//    huffman_instance.compress(s1, bits);
-//    std::cout <<  "Original: " << s1 << "\n";
-//
-//
-//    std::string result1 = "";
-//    huffman_instance.decompress(bits, result1);
-//
-//    std::cout << "Decompressed: " << result1 << "\n\n\n";
+    //=================================================
+    //|    HUFFMAN COMPRESSION TESTS
+    //================================================
+    Huffman& huffman_instance = Huffman::get_instance();
+
+    BitSet bits;
+    std::string s1 {"aaabaacbaa"};
+
+    huffman_instance.compress(s1, bits);
+    std::cout <<  "Original: " << s1 << "\n";
+
+
+    std::string result1 = "";
+    huffman_instance.decompress(bits, result1);
+
+    std::cout << "Decompressed: " << result1 << "\n\n\n";
 //    //=================================================
 //    //|    LZW COMPRESSION TESTS
 //    //================================================

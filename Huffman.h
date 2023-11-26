@@ -6,12 +6,14 @@
 #define COMPRESSIONSERVICE_HUFFMAN_H
 
 #include "Compress.h"
+#include "util.h"
 
 #include <memory>
 #include <iostream>
 #include <unordered_map>
 #include <queue>
 #include <optional>
+#include <sstream>
 
 
 // TODO: Create proper bitstream class instead of std::vector<Bool>
@@ -19,7 +21,6 @@
 
 struct Node;
 using huff_node_ptr = std::shared_ptr<Node>;
-using BitSet = std::vector<bool>;
 
 enum class Node_Type {
     Leaf,
@@ -28,14 +29,16 @@ enum class Node_Type {
 
 struct Node {
     Node() = default;
-    Node(int freq, huff_node_ptr left, huff_node_ptr right)
+    Node(int freq, huff_node_ptr left, huff_node_ptr right) // Internal Node Constructor
         : freq_ {freq}, c_ {std::nullopt}, type_{Node_Type::Internal}, left_{left}, right_{right} {}
 
-    Node(int freq, char c) : freq_{freq}, c_{c}, type_{Node_Type::Leaf}, left_{nullptr}, right_{nullptr} {}
+    Node(int freq, char c) // Leaf Node Constructor
+        : freq_{freq}, c_{c}, type_{Node_Type::Leaf}, left_{nullptr}, right_{nullptr} {}
 
     int freq_;
     std::optional<char> c_;
-    Node_Type type_;
+    Node_Type type_; // TODO: probably redundant
+
     huff_node_ptr left_;
     huff_node_ptr right_;
 };
@@ -62,6 +65,27 @@ public:
     Huffman(Huffman&& other) = delete;
     Huffman& operator=(const Huffman&& other) = delete;
 
+    // ~Huffman() override {};
+
+    void compress_file(const std::string& ifilename, std::string& ofilename) {
+        std::ifstream ifile{ifilename};
+
+        if(ifile.is_open()) {
+            std::cout << "File: " << ifilename << " is open!\n";
+        } else {
+            std::cout << "Failed to open: " << ifilename << "\n";
+        }
+
+        std::stringstream buff;
+        buff << ifile.rdbuf();
+
+        BitSet compressed;
+        compress(buff.str(), compressed);
+
+        std::ofstream ofile{ofilename};
+        write_codes(ofile, codes_);
+        write_content(ofile, compressed);
+    }
 
     void compress(const std::string& src, BitSet& compressed) override {
         std::cout << "Compressing...\n";
@@ -75,7 +99,6 @@ public:
             // TODO replace with memcpy calls
             compressed.insert(compressed.end(), code.begin(), code.end());
         }
-
     }
 
     void decompress(const BitSet& compressed, std::string& src) override {
@@ -104,6 +127,32 @@ public:
 
 private:
     Huffman() = default;
+
+    void write_codes(std::ofstream& ofile, std::unordered_map<char, BitSet>& codes) {
+        assert(codes.size() < 256);
+        ofile << static_cast<uint8_t>(codes.size()); // write num elements in map
+
+        for(const auto& [elem, code] : codes) {
+            std::vector<uint8_t> bytes;
+            vbit_to_vbyte(code, bytes);
+            ofile << elem // char
+                  << static_cast<uint8_t>(code.size()); // length of bit pattern in bits
+            std::for_each(bytes.begin(), bytes.end(), [&ofile](auto byte) {
+                ofile << byte;
+            });
+        }
+    }
+
+    void write_content(std::ofstream& ofile, BitSet& compressed) {
+        ofile << static_cast<uint32_t>(compressed.size());
+
+        std::vector<uint8_t> bytes;
+        vbit_to_vbyte(compressed, bytes);
+
+        std::for_each(bytes.begin(), bytes.end(), [&ofile](auto byte){
+            ofile << byte;
+        });
+    }
 
     void build_histogram(const std::string& src, std::unordered_map<char, int>& histogram) {
         for(auto c : src) {

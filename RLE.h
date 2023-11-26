@@ -27,6 +27,8 @@ public:
     RLE(const RLE&& other) = delete;
     RLE& operator=(const RLE&& other) = delete;
 
+    // ~RLE() override { }
+
     void compress(const std::string& src, std::string& compressed) override {
         std::cout << "Compressing... \n";
 

@@ -24,6 +24,8 @@ public:
     LZW(const LZW&& other) = delete;
     LZW& operator=(const LZW&& other) = delete;
 
+   //  ~LZW() override { }
+
     void compress(const std::string& src, IntegerList& compressed) override {
         std::cout << "Compressing...\n";
         std::unordered_map<std::string, int> dict;
