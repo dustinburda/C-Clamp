@@ -70,18 +70,22 @@ public:
     void compress_file(const std::string& ifilename, std::string& ofilename) {
         std::ifstream ifile{ifilename};
 
+        // Open File
         if(ifile.is_open()) {
             std::cout << "File: " << ifilename << " is open!\n";
         } else {
             std::cout << "Failed to open: " << ifilename << "\n";
         }
 
+        // Dump contents of file into string
         std::stringstream buff;
         buff << ifile.rdbuf();
 
+        // Compress string into vector<bool>/Bits
         BitSet compressed;
         compress(buff.str(), compressed);
 
+        // Write header and compressed Bitset into Fileß
         std::ofstream ofile{ofilename};
         write_codes(ofile, codes_);
         write_content(ofile, compressed);
@@ -96,7 +100,6 @@ public:
 
         for(auto elem : src) {
             auto& code = codes_[elem];
-            // TODO replace with memcpy calls
             compressed.insert(compressed.end(), code.begin(), code.end());
         }
     }

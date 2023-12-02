@@ -27,19 +27,19 @@ int main() {
 //    //=================================================
 //    //|    LZW COMPRESSION TESTS
 //    //================================================
-//
-//    LZW& lzw_instance = LZW::get_instance();
-//
-//    IntegerList ints;
-//    std::string s2 {"Compress this with LZW!"};
-//
-//    lzw_instance.compress(s2, ints);
-//    std::cout <<  "Original: " << s2 << "\n";
-//
-//    std::string result2 = "";
-//    lzw_instance.decompress(ints, result2);
-//
-//    std::cout << "Decompressed: " << result2 << "\n\n\n";
+
+    LZW& lzw_instance = LZW::get_instance();
+
+    IntegerList ints;
+    std::string s2 {"Compress this with LZW!"};
+
+    lzw_instance.compress(s2, ints);
+    std::cout <<  "Original: " << s2 << "\n";
+
+    std::string result2 = "";
+    lzw_instance.decompress(ints, result2);
+
+    std::cout << "Decompressed: " << result2 << "\n\n\n";
 
 
     //=================================================
