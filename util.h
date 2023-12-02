@@ -43,7 +43,7 @@ static void vbit_to_vbyte(const std::vector<bool>& bits, std::vector<uint8_t>& b
 }
 
 // length is in bits
-static void vbyte_to_vbit(uint8_t length, std::vector<uint8_t>& bytes, std::vector<bool>& bits) {
+static void vbyte_to_vbit(uint32_t length, std::vector<uint8_t>& bytes, std::vector<bool>& bits) {
     if(length == 0 || std::ceil(length / 8.0f) > bytes.size() ) {
         return;
     }

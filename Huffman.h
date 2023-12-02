@@ -80,12 +80,13 @@ public:
         // Get File Size
         std::size_t filesize = std::filesystem::file_size(ifilename);
         std::vector<uint8_t> buff;
-        buff.reserve(filesize);
+        buff.resize(filesize);
 
         // Dump contents of file into vec<u8> buff
-        buff.insert(buff.begin(),
-                    std::istream_iterator<uint8_t>(ifile),
-                    std::istream_iterator<uint8_t>());
+//        buff.insert(buff.begin(),
+//                    std::istream_iterator<uint8_t>(ifile),
+//                    std::istream_iterator<uint8_t>());
+        ifile.read((char *)buff.data(), filesize);
 
         // Compress string into vector<bool>/Bits
         BitSet compressed;
@@ -95,6 +96,89 @@ public:
         std::ofstream ofile{ofilename, std::iostream::binary};
         write_codes(ofile, codes_);
         write_content(ofile, compressed);
+    }
+
+    void write_uncompressed_content(std::ofstream& ofile, std::vector<uint8_t>& uncompressed_content) {
+        std::for_each(uncompressed_content.begin(), uncompressed_content.end(), [&ofile](uint8_t& byte) {
+            ofile << byte;
+        });
+    }
+
+    void read_code(std::ifstream& ifile, std::vector<uint8_t>& code_bytes, uint8_t code_length) {
+        int num_bytes = std::ceil(code_length / 8.0);
+        code_bytes.reserve(num_bytes);
+
+        for(int i = 0; i < num_bytes; i++) {
+            uint8_t curr_byte;
+            ifile.read((char*)&curr_byte, 1);
+            code_bytes.push_back(curr_byte);
+        }
+
+    }
+
+    void read_reverse_codes(std::ifstream& ifile) {
+        uint8_t reverse_codes_size = 0;
+        ifile.read((char*)&reverse_codes_size, 1);
+
+        for(int i = 0; i < reverse_codes_size; i++) {
+            char character;
+            uint8_t code_length;
+            ifile.read(&character, 1);
+            ifile.read((char*)&code_length, 1);
+            //ifile >> character >> code_length;
+
+            std::vector<uint8_t> code_bytes;
+            read_code(ifile, code_bytes, code_length);
+
+            BitSet code_bits;
+            vbyte_to_vbit(code_length, code_bytes, code_bits);
+
+            reverse_codes_[code_bits] = static_cast<uint8_t>(character);
+        }
+    }
+
+    void read_content(std::ifstream& ifile, uint32_t& content_length, std::vector<uint8_t>& compressed_content_bytes) {
+        ifile.read((char*)&content_length, 4);
+
+        int num_bytes = std::ceil(content_length / 8.0);
+        compressed_content_bytes.reserve(num_bytes);
+
+        for(int i = 0; i < num_bytes; i++) {
+            uint8_t curr_byte = 0;
+            ifile.read((char*)&curr_byte, 1);
+            compressed_content_bytes.push_back(curr_byte);
+        }
+    }
+
+    void decompress_file(const std::string& ifilename, const std::string& ofilename) {
+        std::ifstream ifile{ifilename, std::ios::binary};
+
+        // Open Compressed File
+        if(ifile.is_open()) {
+            std::cout << "File: " << ifilename << " is open!\n";
+        } else {
+            std::cout << "Failed to open: " << ifilename << "\n";
+        }
+
+        //Read Codes from ifile
+        read_reverse_codes(ifile);
+
+        //Read Length + Content
+        uint32_t content_length;
+        std::vector<uint8_t> compressed_content_bytes;
+        read_content(ifile, content_length, compressed_content_bytes);
+
+        // Dump compressed content into vector<uint8_t>
+        std::vector<bool> compressed_content_bits;
+        vbyte_to_vbit(content_length, compressed_content_bytes, compressed_content_bits);
+
+        // Uncompressed content
+        std::vector<uint8_t> uncompressed_content;
+        decompress(compressed_content_bits, uncompressed_content);
+
+        // Write uncompressed content into output file
+        std::ofstream ofile{ofilename, std::iostream::binary};
+        write_uncompressed_content(ofile, uncompressed_content);
     }
 
     void compress(const std::vector<uint8_t>& src, BitSet& compressed) override {
@@ -113,20 +197,36 @@ public:
 
     void decompress(const BitSet& compressed, std::vector<uint8_t>& src) override {
         std::cout << "Decompressing...\n";
+        // TODO: Rewrite this routine using reverse_codes_
 
-        auto curr = root_;
+        BitSet curr_code;
 
         for(auto bit : compressed) {
-            curr = (bit == 0) ? curr->left_
-                              : curr->right_;
+            curr_code.push_back(bit);
 
-            if(curr->type_ == Node_Type::Leaf) {
-                auto char_elem = curr->c_.value();
-                src.push_back(char_elem);
+            if(reverse_codes_.count(curr_code) > 0) {
+                auto character = reverse_codes_[curr_code];
+                src.push_back(character);
 
-                curr = root_;
+                curr_code = {};
             }
+
+
         }
+
+//        auto curr = root_;
+//
+//        for(auto bit : compressed) {
+//            curr = (bit == 0) ? curr->left_
+//                              : curr->right_;
+//
+//            if(curr->type_ == Node_Type::Leaf) {
+//                auto char_elem = curr->c_.value();
+//                src.push_back(char_elem);
+//
+//                curr = root_;
+//            }
+//        }
     }
 
     void reset() {
@@ -144,11 +244,15 @@ private:
 
         for(const auto& [elem, code] : codes) {
             std::vector<uint8_t> bytes;
+            uint8_t code_size = code.size();
             vbit_to_vbyte(code, bytes);
-            ofile << elem // char
-                  << static_cast<uint8_t>(code.size()); // length of bit pattern in bits
+//            ofile << elem // char
+//                  << static_cast<uint8_t>(code.size()); // length of bit pattern in bits
+            ofile.write((char*)&elem, 1);
+            ofile.write((char*)&code_size, 1);
+
             std::for_each(bytes.begin(), bytes.end(), [&ofile](auto byte) {
-                ofile << byte;
+               ofile.write((char*)&byte, 1);
             });
         }
     }
@@ -161,7 +265,7 @@ private:
         vbit_to_vbyte(compressed, bytes);
 
         std::for_each(bytes.begin(), bytes.end(), [&ofile](auto byte){
-            ofile << byte;
+            ofile.write((char*)&byte, 1);
         });
     }
 
@@ -225,7 +329,7 @@ private:
 private:
     huff_node_ptr root_;
     std::unordered_map<uint8_t, BitSet> codes_;
-
+    std::unordered_map<BitSet, uint8_t> reverse_codes_;
 };
 
 
