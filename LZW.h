@@ -9,7 +9,7 @@
 #include <iostream>
 #include <unordered_map>
 
-class LZW : public Compressor<IntegerList> {
+class LZW : public Compressor<std::string, IntegerList> {
 public:
     // Singleton
     static LZW& get_instance() {

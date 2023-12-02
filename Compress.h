@@ -10,11 +10,11 @@
 using BitSet = std::vector<bool>;
 using IntegerList = std::vector<int>;
 
-template<typename T>
+template<typename I, typename O>
 class Compressor {
 public:
-    virtual void compress(const std::string& src, T& compressed) = 0;
-    virtual void decompress(const T& compressed, std::string& src) = 0;
+    virtual void compress(const I& src, O& compressed) = 0;
+    virtual void decompress(const O& compressed, I& src) = 0;
     // virtual ~Compressor();
 };
 

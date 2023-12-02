@@ -12,7 +12,7 @@
 
 // TODO, use bitstream class, and compress binary runs
 
-class RLE : public Compressor<std::string> {
+class RLE : public Compressor<std::string, std::string> {
 public:
     // Singleton
     static RLE& get_instance() {
