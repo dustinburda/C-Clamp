@@ -26,6 +26,14 @@ public:
 
    //  ~LZW() override { }
 
+   std::optional<uint8_t> word_size(uint8_t w_size) {
+       if(w_size < 8)
+           return std::nullopt;
+
+       word_size_ = w_size;
+       return w_size;
+   }
+
     void compress(const std::string& src, IntegerList& compressed) override {
         std::cout << "Compressing...\n";
         std::unordered_map<std::string, int> dict;
@@ -86,9 +94,7 @@ public:
     }
 
 private:
-
-    LZW() = default;
-
+    LZW() : word_size_{8} {}
 
     void build_compress_dict(std::unordered_map<std::string, int> & dict) {
         bool wrap = false;
@@ -109,7 +115,8 @@ private:
                 wrap = true;
         }
     }
-
+private:
+    uint8_t word_size_;
 };
 
 
