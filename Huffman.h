@@ -14,10 +14,10 @@
 #include <queue>
 #include <optional>
 #include <sstream>
+#include <algorithm>
 
 
-// TODO: Create proper bitstream class instead of std::vector<Bool>
-// TODO: Test
+#define DEBUG 0
 
 struct Node;
 using huff_node_ptr = std::shared_ptr<Node>;
@@ -214,19 +214,21 @@ public:
 
         }
 
-//        auto curr = root_;
-//
-//        for(auto bit : compressed) {
-//            curr = (bit == 0) ? curr->left_
-//                              : curr->right_;
-//
-//            if(curr->type_ == Node_Type::Leaf) {
-//                auto char_elem = curr->c_.value();
-//                src.push_back(char_elem);
-//
-//                curr = root_;
-//            }
-//        }
+#if DEBUG
+        auto curr = root_;
+
+        for(auto bit : compressed) {
+            curr = (bit == 0) ? curr->left_
+                              : curr->right_;
+
+            if(curr->type_ == Node_Type::Leaf) {
+                auto char_elem = curr->c_.value();
+                src.push_back(char_elem);
+
+                curr = root_;
+            }
+        }
+#endif // DEBUG
     }
 
     void reset() {

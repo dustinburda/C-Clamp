@@ -8,9 +8,12 @@
 #include "Compress.h"
 #include <string>
 #include <iostream>
-
+#include <fstream>
+#include <sstream>
+#include <functional>
 
 // TODO, use bitstream class, and compress binary runs
+
 
 class RLE : public Compressor<std::string, std::string> {
 public:
@@ -28,6 +31,19 @@ public:
     RLE& operator=(const RLE&& other) = delete;
 
     // ~RLE() override { }
+
+    void apply_function_to_file(const std::string& ifilename, const std::string& ofilename, std::function<void(const std::string&, std::string&)> func) {
+        std::ifstream ifile { ifilename };
+
+        std::stringstream ss;
+        ss << ifile.rdbuf(); // possibly bad
+
+        std::string file_content;
+        func(ss.str(), file_content);
+
+        std::ofstream ofile { ofilename };
+        ofile << file_content; // possibly bad
+    }
 
     void compress(const std::string& src, std::string& compressed) override {
         std::cout << "Compressing... \n";
@@ -49,6 +65,13 @@ public:
         write_char_quantity(compressed, curr, count);
     }
 
+    // https://stackoverflow.com/questions/7582546/using-generic-stdfunction-objects-with-member-functions-in-one-class
+    void compress_file(const std::string& ifilename, const std::string& ofilename) {
+        std::function<void(const std::string&, std::string&)> compress_func = std::bind(&RLE::compress, this, std::placeholders::_1, std::placeholders::_2);
+        apply_function_to_file(ifilename, ofilename, compress_func);
+    }
+
+
     void decompress(const std::string& compressed, std::string& src) override {
         std::cout << "Decompressing... \n";
 
@@ -61,6 +84,11 @@ public:
             src += std::string(quantity, elem);
         }
 
+    }
+
+    void decompress_file(const std::string& ifilename, const std::string& ofilename) {
+        std::function<void(const std::string&, std::string&)> decompress_func = std::bind(&RLE::decompress, this, std::placeholders::_1, std::placeholders::_2);
+        apply_function_to_file(ifilename, ofilename, decompress_func);
     }
 
 private:

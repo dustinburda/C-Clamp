@@ -69,11 +69,12 @@ int main() {
 //
 //    std::cout << "Decompressed: " << s_result1 << "\n\n\n";
 //    assert(s1 == s_result1);
-        huffman_instance.compress_file("/Users/dustin/Desktop/Programming/C++ Programming/CompressionService/cmake-build-debug/compress_this.txt",
-                                       "/Users/dustin/Desktop/Programming/C++ Programming/CompressionService/cmake-build-debug/compressed_file.txt");
 
-        huffman_instance.decompress_file("/Users/dustin/Desktop/Programming/C++ Programming/CompressionService/cmake-build-debug/compressed_file.txt",
-                                         "/Users/dustin/Desktop/Programming/C++ Programming/CompressionService/cmake-build-debug/uncompressed_file.txt");
+//        huffman_instance.compress_file("/Users/dustin/Desktop/Programming/C++ Programming/CompressionService/cmake-build-debug/compress_this.txt",
+//                                       "/Users/dustin/Desktop/Programming/C++ Programming/CompressionService/cmake-build-debug/compressed_file.txt");
+//
+//        huffman_instance.decompress_file("/Users/dustin/Desktop/Programming/C++ Programming/CompressionService/cmake-build-debug/compressed_file.txt",
+//                                         "/Users/dustin/Desktop/Programming/C++ Programming/CompressionService/cmake-build-debug/uncompressed_file.txt");
 
 //    //=================================================
 //    //|    LZW COMPRESSION TESTS
@@ -97,8 +98,14 @@ int main() {
     //|    RLE COMPRESSION TESTS
     //================================================
 
-//    RLE& rle_instance = RLE::get_instance();
-//
+    RLE& rle_instance = RLE::get_instance();
+
+           rle_instance.compress_file("/Users/dustin/Desktop/Programming/C++ Programming/CompressionService/cmake-build-debug/compress_thisRLE.txt",
+                                       "/Users/dustin/Desktop/Programming/C++ Programming/CompressionService/cmake-build-debug/compressed_fileRLE.txt");
+
+        rle_instance.decompress_file("/Users/dustin/Desktop/Programming/C++ Programming/CompressionService/cmake-build-debug/compressed_fileRLE.txt",
+                                         "/Users/dustin/Desktop/Programming/C++ Programming/CompressionService/cmake-build-debug/uncompressed_fileRLE.txt");
+
 //    std::string compressed;
 //    std::string s3 { "eddddaaaacccccgcccf" };
 //
