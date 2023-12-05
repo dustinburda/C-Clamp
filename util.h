@@ -8,6 +8,23 @@
 #include <vector>
 #include <cstdlib>
 
+static void integer_to_bits(int integer, std::vector<bool>& bits, uint8_t word_size_) {
+    bits.resize(word_size_);
+    for(int i = word_size_ - 1; i >= 0; i--) {
+        int mask = 1 << i;
+        bits[word_size_ - 1 - i] = integer & mask;
+    }
+}
+
+static void vinteger_to_vbit(IntegerList& v_integer, std::vector<bool>& v_bit, uint8_t word_size_) {
+    for(auto& integer : v_integer) {
+        std::vector<bool> bits;
+        integer_to_bits(integer, bits, word_size_);
+
+        v_bit.insert(v_bit.end(), bits.begin(), bits.end());
+    }
+}
+
 static void vbit_to_vbyte(const std::vector<bool>& bits, std::vector<uint8_t>& bytes) {
     if(bits.empty())
         return;

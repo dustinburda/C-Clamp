@@ -2,6 +2,8 @@
 #include "Huffman.h"
 #include "LZW.h"
 #include "RLE.h"
+#include "quotes.h"
+
 
 
 void string_to_bytes(const std::string& src, std::vector<uint8_t>& bytes) {
@@ -70,68 +72,48 @@ int main() {
 //    std::cout << "Decompressed: " << s_result1 << "\n\n\n";
 //    assert(s1 == s_result1);
 
-//        huffman_instance.compress_file("/Users/dustin/Desktop/Programming/C++ Programming/CompressionService/cmake-build-debug/compress_this.txt",
-//                                       "/Users/dustin/Desktop/Programming/C++ Programming/CompressionService/cmake-build-debug/compressed_file.txt");
-//
-//        huffman_instance.decompress_file("/Users/dustin/Desktop/Programming/C++ Programming/CompressionService/cmake-build-debug/compressed_file.txt",
-//                                         "/Users/dustin/Desktop/Programming/C++ Programming/CompressionService/cmake-build-debug/uncompressed_file.txt");
+    auto start = std::chrono::steady_clock::now();
 
+
+
+        huffman_instance.compress_file("/Users/dustin/Desktop/Programming/C++ Programming/CompressionService/cmake-build-debug/compress_this.txt",
+                                       "/Users/dustin/Desktop/Programming/C++ Programming/CompressionService/cmake-build-debug/compressed_file.txt");
+auto compression_end = std::chrono::steady_clock::now();
+
+        huffman_instance.decompress_file("/Users/dustin/Desktop/Programming/C++ Programming/CompressionService/cmake-build-debug/compressed_file.txt",
+                                         "/Users/dustin/Desktop/Programming/C++ Programming/CompressionService/cmake-build-debug/uncompressed_file.txt");
+
+    auto end = std::chrono::steady_clock::now();
+
+    std::cout << "Compression Time: " << std::chrono::duration_cast<std::chrono::milliseconds>(compression_end - start).count() << std::endl;
+    std::cout << "Decompression Time: " << std::chrono::duration_cast<std::chrono::milliseconds>(end - compression_end).count() << std::endl;
 //    //=================================================
 //    //|    LZW COMPRESSION TESTS
 //    //================================================
 
-    LZW& lzw_instance = LZW::get_instance();
-
-    IntegerList ints;
-    std::string s2 {"This is the 100th Etext file presented by Project Gutenberg, and\n"
-                    "is presented in cooperation with World Library, Inc., from their\n"
-                    "Library of the Future and Shakespeare CDROMS.  Project Gutenberg\n"
-                    "often releases Etexts that are NOT placed in the Public Domain!!\n"
-                    "\n"
-                    "Shakespeare\n"
-                    "\n"
-                    "*This Etext has certain copyright implications you should read!*\n"
-                    "\n"
-                    "<<THIS ELECTRONIC VERSION OF THE COMPLETE WORKS OF WILLIAM\n"
-                    "SHAKESPEARE IS COPYRIGHT 1990-1993 BY WORLD LIBRARY, INC., AND IS\n"
-                    "PROVIDED BY PROJECT GUTENBERG ETEXT OF ILLINOIS BENEDICTINE COLLEGE\n"
-                    "WITH PERMISSION.  ELECTRONIC AND MACHINE READABLE COPIES MAY BE\n"
-                    "DISTRIBUTED SO LONG AS SUCH COPIES (1) ARE FOR YOUR OR OTHERS\n"
-                    "PERSONAL USE ONLY, AND (2) ARE NOT DISTRIBUTED OR USED\n"
-                    "COMMERCIALLY.  PROHIBITED COMMERCIAL DISTRIBUTION INCLUDES BY ANY\n"
-                    "SERVICE THAT CHARGES FOR DOWNLOAD TIME OR FOR MEMBERSHIP.>>\n"
-                    "\n"
-                    "*Project Gutenberg is proud to cooperate with The World Library*\n"
-                    "in the presentation of The Complete Works of William Shakespeare\n"
-                    "for your reading for education and entertainment.  HOWEVER, THIS\n"
-                    "IS NEITHER SHAREWARE NOR PUBLIC DOMAIN. . .AND UNDER THE LIBRARY\n"
-                    "OF THE FUTURE CONDITIONS OF THIS PRESENTATION. . .NO CHARGES MAY\n"
-                    "BE MADE FOR *ANY* ACCESS TO THIS MATERIAL.  YOU ARE ENCOURAGED!!\n"
-                    "TO GIVE IT AWAY TO ANYONE YOU LIKE, BUT NO CHARGES ARE ALLOWED!!\n"
-                    "\n"
-                    "\n"
-                    "**Welcome To The World of Free Plain Vanilla Electronic Texts**\n"
-                    "\n"
-                    "**Etexts Readable By Both Humans and By Computers, Since 1971**\n"
-                    "\n"
-                    "*These Etexts Prepared By Hundreds of Volunteers and Donations*\n"
-                    "\n"
-                    "Information on contacting Project Gutenberg to get Etexts, and\n"
-                    "further information is included below.  We need your donations.\n"
-                    "\n"
-                    "\n"
-                    "The Complete Works of William Shakespeare \n"
-                    "\n"
-                    "January, 1994  [Etext #100]"};
-
-    lzw_instance.compress(s2, ints);
-    std::cout <<  "Original: " << s2 << "\n";
-
-    std::string result2 = "";
-    lzw_instance.decompress(ints, result2);
-
-    std::cout << "Decompressed: " << result2 << "\n\n\n";
-    assert(s2 == result2);
+//    LZW& lzw_instance = LZW::get_instance();
+//    lzw_instance.set_word_size(10);
+//
+//    IntegerList ints;
+//
+////    std::string s2 = "gegefykfymjkykky"; // g   e    ge   f    y    k    fy   m   j   k   yk  ky
+////                                         // 103 101  256  102  121  107  259  109 106 107 260 265
+////                                      //        256  257  258  259  260  261  262 263 264 265 266
+////                                     // {ge: 256, eg: 257, gef: 258, fy: 259, yk: 260, kf: 261, fym: 262, mj: 263, jk:264, ky: 265, ykk: 266}
+//
+//    std::string s2 = SHAKESPEARE;
+//    std::vector<uint8_t> bytes {s2.begin(), s2.end()};
+//
+//    lzw_instance.compress(bytes, ints);
+//
+//
+//    std::vector<uint8_t> result_bytes;
+//    lzw_instance.decompress(ints, result_bytes);
+//
+//    std::string result_string {result_bytes.begin(), result_bytes.end()};
+//
+//    std::cout << "Decompressed: " << result_string << "\n\n\n";
+//    assert(s2 == result_string);
 
 
     //=================================================
